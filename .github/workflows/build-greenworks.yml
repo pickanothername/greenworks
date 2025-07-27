@@ -21,6 +21,14 @@ jobs:
         with:
           node-version: 18
 
+      # Only install Python 2.7 on Ubuntu (required for nw-gyp)
+      - name: Install Python 2.7 (Ubuntu only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python2
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
+
       - name: Install dependencies
         run: npm install
 
@@ -31,7 +39,7 @@ jobs:
           curl -LO https://repo.huaweicloud.com/nwjs/v0.51.0/nw-headers-v0.51.0.tar.gz
           tar -xzf nw-headers-v0.51.0.tar.gz
           mkdir -p ~/.nw-gyp/v0.51.0
-          cp -r nw-headers-v0.51.0.tar.gz ~/.nw-gyp/v0.51.0/
+          cp -r nw-headers-v0.51.0/* ~/.nw-gyp/v0.51.0/
 
       - name: Build native module
         run: |
