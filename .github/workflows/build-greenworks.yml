@@ -40,10 +40,16 @@ jobs:
         shell: pwsh
         run: |
           choco install -y python2
-          refreshenv
-          npm config set python C:\Python27\python.exe
+      
+          # Manually add Python 2.7 to PATH for this session
+          $env:PATH = "C:\Python27;" + $env:PATH
+      
+          # Confirm python path
+          $pythonPath = "C:\Python27\python.exe"
+          npm config set python $pythonPath
+      
           echo "Using Python version:"
-          & C:\Python27\python.exe --version
+          & $pythonPath --version
 
       - name: Install dependencies and build
         run: |
