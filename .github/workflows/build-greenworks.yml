@@ -27,7 +27,7 @@ jobs:
 
       - name: Download NW.js headers
         run: |
-          curl -LO https://node-webkit.s3.amazonaws.com/v${{ env.NW_VERSION }}/node-webkit-v${{ env.NW_VERSION }}-headers.tar.gz
+          curl -LO https://repo.huaweicloud.com/nwjs/v${{ env.NW_VERSION }}/node-webkit-v${{ env.NW_VERSION }}-headers.tar.gz
           mkdir -p ./nw-headers
           tar -xzf node-webkit-v${{ env.NW_VERSION }}-headers.tar.gz -C ./nw-headers
 
