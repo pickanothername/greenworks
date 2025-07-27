@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: '18'
 
+      # macOS Python 2.7 install and setup
       - name: Install Python 2.7 (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -26,46 +27,51 @@ jobs:
           brew install pyenv
           pyenv install 2.7.18
           pyenv global 2.7.18
-      
+
           # Set PYENV_ROOT environment variable
           echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
-      
+
           # Add pyenv bin and shims to PATH
           echo "PATH=$HOME/.pyenv/shims:$HOME/.pyenv/bin:$PATH" >> $GITHUB_ENV
-      
+
           python --version
 
-      - name: Install Python 2.7 on Windows
+      # Windows Python 2.7 install
+      - name: Install Python 2.7 (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-              choco install -y python2
+          choco install -y python2
 
-      - name: Add Python 2.7 to PATH for this session (Windows)
+      # Add Python 2.7 to PATH for Windows runner session
+      - name: Add Python 2.7 to PATH (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-              echo "PATH=C:\\Python27;${{ env.PATH }}" >> $env:GITHUB_ENV
+          $env:PATH = "C:\Python27;" + $env:PATH
 
-      - name: Set PYTHON environment variable for node-gyp on Windows
+      # Set PYTHON environment variable for node-gyp on Windows
+      - name: Set PYTHON env var for node-gyp (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-              echo "PYTHON=C:\\Python27\\python.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          echo "PYTHON=C:\\Python27\\python.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
 
-      - name: Check Python version on Windows
+      # Confirm Python version on Windows runner
+      - name: Check Python version (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-              C:\Python27\python.exe --version
+          C:\Python27\python.exe --version
 
+      # Install dependencies and build (runs on both OS)
       - name: Install dependencies and build
         run: |
-              npm install -g nw-gyp
-              npm install
-              nw-gyp rebuild --target=0.51.0 --arch=${{ matrix.arch }} --python="C:\\Python27\\python.exe"
+          npm install -g nw-gyp
+          npm install
+          nw-gyp rebuild --target=0.51.0 --arch=${{ matrix.arch }} --python="${{ runner.os == 'Windows' && 'C:\\Python27\\python.exe' || 'python' }}"
 
-      # Optional: Upload built binaries
+      # Upload built binaries
       - uses: actions/upload-artifact@v4
         with:
           name: greenworks-${{ runner.os }}-${{ matrix.arch }}
