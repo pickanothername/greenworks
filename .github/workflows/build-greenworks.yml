@@ -1,46 +1,52 @@
-name: Build native module for NW.js
+name: Build Greenworks
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [macos-latest, windows-latest]
+        arch: [x64]
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
 
-      # Only install Python 2.7 on Ubuntu (required for nw-gyp)
-      - name: Install Python 2.7 (Ubuntu only)
-        if: runner.os == 'Linux'
+      - name: Install Python 2.7 (macOS)
+        if: runner.os == 'macOS'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python2
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          brew update
+          brew install pyenv
+          pyenv install 2.7.18
+          pyenv global 2.7.18
+          echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+          echo "$HOME/.pyenv/bin" >> $GITHUB_PATH
+          echo "$HOME/.pyenv/shims:$PATH" >> $GITHUB_ENV
+          python --version
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Download NW.js headers
+      - name: Configure Python for nw-gyp (Windows)
+        if: runner.os == 'Windows'
         run: |
-          mkdir -p nwjs-headers
-          cd nwjs-headers
-          curl -LO https://repo.huaweicloud.com/nwjs/v0.51.0/nw-headers-v0.51.0.tar.gz
-          tar -xzf nw-headers-v0.51.0.tar.gz
-          mkdir -p ~/.nw-gyp/v0.51.0
-          cp -r nw-headers-v0.51.0/* ~/.nw-gyp/v0.51.0/
+          npm config set python python2.7
+          python --version
 
-      - name: Build native module
+      - name: Install dependencies and build
         run: |
-          npx nw-gyp rebuild --target=0.51.0 --arch=x64
+          npm install -g nw-gyp
+          npm install
+          nw-gyp rebuild --target=0.51.0 --arch=${{ matrix.arch }}
+
+      # Optional: Upload built binaries
+      - uses: actions/upload-artifact@v4
+        with:
+          name: greenworks-${{ runner.os }}-${{ matrix.arch }}
+          path: build/Release/*.node
