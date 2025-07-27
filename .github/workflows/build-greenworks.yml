@@ -39,8 +39,9 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           choco install -y python2
-          npm config set python python2
-          python --version
+          npm config set python "C:\\Python27\\python.exe"
+          echo "Using Python version:"
+          "C:\\Python27\\python.exe" --version
 
       - name: Install dependencies and build
         run: |
