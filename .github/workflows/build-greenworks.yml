@@ -28,8 +28,8 @@ jobs:
         run: |
           mkdir -p nwjs-headers
           cd nwjs-headers
-          curl -LO https://repo.huaweicloud.com/nwjs/v0.51.0/node-webkit-v0.51.0-headers.tar.gz
-          tar -xzf node-webkit-v0.51.0-headers.tar.gz
+          curl -LO https://repo.huaweicloud.com/nwjs/v0.51.0/nw-headers-v0.51.0.tar.gz
+          tar -xzf nw-headers-v0.51.0.tar.gz
           mkdir -p ~/.nw-gyp/v0.51.0
           cp -r node-webkit-*/* ~/.nw-gyp/v0.51.0/
 
