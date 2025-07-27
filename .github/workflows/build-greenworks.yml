@@ -1,6 +1,8 @@
-name: Build Greenworks for NW.js 0.51.0
+name: Build native module for NW.js
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -8,36 +10,29 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
-        arch: [x64]
-    env:
-      NW_VERSION: "0.51.0"
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "16"  # Compatible with NW.js 0.51.0
+          node-version: 18
 
-      - name: Install Dependencies
-        run: npm install -g node-gyp
+      - name: Install dependencies
+        run: npm install
 
       - name: Download NW.js headers
         run: |
-          curl -LO https://repo.huaweicloud.com/nwjs/v${{ env.NW_VERSION }}/node-webkit-v${{ env.NW_VERSION }}-headers.tar.gz
-          mkdir -p ./nw-headers
-          tar -xzf node-webkit-v${{ env.NW_VERSION }}-headers.tar.gz -C ./nw-headers
+          mkdir -p nwjs-headers
+          cd nwjs-headers
+          curl -LO https://repo.huaweicloud.com/nwjs/v0.51.0/node-webkit-v0.51.0-headers.tar.gz
+          tar -xzf node-webkit-v0.51.0-headers.tar.gz
+          mkdir -p ~/.nw-gyp/v0.51.0
+          cp -r node-webkit-*/* ~/.nw-gyp/v0.51.0/
 
-      - name: Build Greenworks
+      - name: Build native module
         run: |
-          npm install
-          node-pre-gyp rebuild --target=${{ env.NW_VERSION }} --target_arch=${{ matrix.arch }} --runtime=node-webkit --dist-url=https://node-webkit.s3.amazonaws.com
-
-      - name: Archive Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: greenworks-${{ matrix.os }}-${{ matrix.arch }}
-          path: build/Release/greenworks.node
+          npx nw-gyp rebuild --target=0.51.0 --arch=x64
