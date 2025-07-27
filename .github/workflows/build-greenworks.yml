@@ -35,21 +35,27 @@ jobs:
       
           python --version
 
-      - name: Install Python 2.7 (Windows)
+      - name: Install Python 2.7 on Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           choco install -y python2
       
-          # Manually add Python 2.7 to PATH for this session
+          # Add Python 2.7 to PATH in this session
           $env:PATH = "C:\Python27;" + $env:PATH
       
-          # Confirm python path
-          $pythonPath = "C:\Python27\python.exe"
-          npm config set python $pythonPath
+      - name: Configure npm to use Python 2.7 on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Explicitly use `npm config set python` without quotes
+          npm config set python C:\Python27\python.exe
       
-          echo "Using Python version:"
-          & $pythonPath --version
+      - name: Check Python version on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          C:\Python27\python.exe --version
 
       - name: Install dependencies and build
         run: |
